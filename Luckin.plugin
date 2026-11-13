@@ -1,0 +1,14 @@
+#!name = 瑞幸咖啡去广告
+#!desc = 开屏接口返回成功响应，避免网络不可用提示；其余同基础版
+#!author = Claude
+#!date = 2026-11-13
+
+[Rewrite]
+^https?:\/\/mkt\.lkcoffee\.com\/webdialog url reject
+^https?:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow url reject
+
+[Script]
+http-request ^https?:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/Luckin_mock.js, timeout=10, tag=luckin_adpos
+
+[MITM]
+hostname = capi.lkcoffee.com, mkt.lkcoffee.com
