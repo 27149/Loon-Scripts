@@ -1,14 +1,17 @@
 #!name=瑞幸咖啡去广告
-#!desc=去除瑞幸咖啡 App 开屏广告（含首页弹窗广告位）与下单确认页弹窗
+#!desc=去除瑞幸咖啡 App 开屏广告（含首页弹窗广告位）与下单确认页弹窗；用加密空响应替代，避免「网络不可用」提示
 #!author=zq
 #!date=2026-11-13
 
-[Rewrite]
-# 广告位配置接口：开屏广告 / 首页弹窗素材均由此下发（响应体加密，只能整体拒绝）
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew reject-dict
+[Script]
+# 广告位配置：开屏广告 / 首页弹窗素材
+http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸开屏广告
 
-# 下单确认页弹窗（进入 order/preview 后立即请求）
-^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow reject-dict
+# 下单确认页弹窗配置
+http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸下单弹窗
+
+# 下单页商品推荐（试验：疑似下单页弹窗的数据来源）
+http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸下单推荐
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com
