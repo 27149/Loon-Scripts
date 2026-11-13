@@ -1,0 +1,14 @@
+#!name=瑞幸咖啡去广告
+#!desc=去除瑞幸咖啡 App 开屏广告（含首页弹窗广告位）与下单确认页弹窗
+#!author=zq
+#!date=2026-11-13
+
+[Rewrite]
+# 广告位配置接口：开屏广告 / 首页弹窗素材均由此下发（响应体加密，只能整体拒绝）
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew reject-dict
+
+# 下单确认页弹窗（进入 order/preview 后立即请求）
+^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow reject-dict
+
+[MITM]
+hostname = %APPEND% capi.lkcoffee.com
