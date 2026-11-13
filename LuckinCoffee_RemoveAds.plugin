@@ -1,6 +1,7 @@
 #!name=瑞幸咖啡去广告
 #!desc=去除瑞幸咖啡 App 开屏广告（含首页弹窗广告位）与下单确认页弹窗；用加密空响应替代，避免「网络不可用」提示
 #!author=zq
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/9d/3b/9a/9d3b9ad3-4b4c-8dae-68c5-d6a1594d20e6/AppIcon-0-0-1x_U007emarketing-0-6-0-85-220.png/256x256bb.png
 #!date=2026-11-14
 
 [Rule]
