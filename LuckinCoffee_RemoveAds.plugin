@@ -13,13 +13,13 @@ debug = switch,false,tag=调试日志
 # 开屏广告 + 首页弹窗素材
 # 旧做法：http-request 阶段直接伪造响应 → 丢掉信封和响应头（怀疑的掉登录根因）
 # 新做法：让请求正常到达服务器，只在响应侧清空 content
-response if ${url} ~= /capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew/i then script("https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_ad_strip.js", {${debug}}) with requires_body=true, tag="瑞幸开屏", timeout=20
+response if ${url} ~= /capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew/i then script("https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js", {${debug}}) with requires_body=true, tag="瑞幸开屏", timeout=20
 
 # 下单确认页弹窗（默认关闭，先隔离掉登录变量；确认无影响后再打开）
-response if ${url} ~= /capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow/i then script("https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_ad_strip.js", {${debug}}) with requires_body=true, enable=${order_popup}, tag="瑞幸下单弹窗", timeout=20
+response if ${url} ~= /capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow/i then script("https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js", {${debug}}) with requires_body=true, enable=${order_popup}, tag="瑞幸下单弹窗", timeout=20
 
 # 下单页商品推荐（同上，默认关闭）
-response if ${url} ~= /capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender/i then script("https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_ad_strip.js", {${debug}}) with requires_body=true, enable=${order_popup}, tag="瑞幸下单推荐", timeout=20
+response if ${url} ~= /capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender/i then script("https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js", {${debug}}) with requires_body=true, enable=${order_popup}, tag="瑞幸下单推荐", timeout=20
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40

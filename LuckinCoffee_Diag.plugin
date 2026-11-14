@@ -4,7 +4,7 @@
 #!date=2026-11-14
 
 [Script]
-response if ${url} ~= /capi\.lkcoffee\.com/i then script("https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_diag.js") with requires_body=true, tag="瑞幸诊断", timeout=20
+response if ${url} ~= /capi\.lkcoffee\.com/i then script("https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_diag.js") with requires_body=true, tag="瑞幸诊断", timeout=20
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
