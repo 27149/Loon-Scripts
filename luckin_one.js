@@ -13,19 +13,19 @@
   var EMPTY = "-UBHkcAJ3OmMImYZUqpZFSq6F9XXNfjIELv4HZUdZRDaSi-pRBTbLeTL6IsJGh-oB_Rti0AhsF2j7SdHYvllbK2gLtxAEiipsx-uk-n4dBnZESZ7a6Nb0r9qTt0UeyBUdFj4LxqiaccdyK8PnN4FYb50_Lw47ZLrMTBaW_4DO5YDwVZ9p5fY_lQP6C90DSE2qgLl4DyZ7PgEHi08cS0yPI_ojG68kMA8LTqGO0wpVV4IAqVaxDjm4SZ4MUGqGz_MC1f_mHH1q8Num1bn0SamilxnA-5dBUI9F9ImNLQg9MhlGwk7g1BGwe395GIsNUWnm1w88FmEYJv-NeOksSAyWIULVm4504TvPsfrRp0ikJcehz8o9J9cEWTPU4tyAwvviF0GkP_irZ6Dc-eJrFVoensYiyt03QFg3b9Tchgxfzg=";
 
   var INTERCEPT = [
-    // 开屏素材（原 adposNew 通道）
+    // 开屏广告。129 号抓包：被伪造 3 次，全程 uid 稳定在 123，安全
     /^\/resource\/m\/sys\/app\/adposNew$/,
 
-    // 视觉效果模块：v7 里开着，但 v7.1 后出现掉登录，它是每次启动都调 3 次的接口，
-    // 最可能承载会话引导数据，v8 先摘掉（首页弹窗可能会回来，用于确认它是不是元凶）
-    // /^\/resource\/m\/sys\/visual\/effect\/modules$/,
+    // 视觉效果模块（首页弹窗素材）。129 号抓包：被伪造 14 次，全程 uid 稳定在 123，安全
+    /^\/resource\/m\/sys\/visual\/effect\/modules$/,
 
-    // 下单确认页弹窗
-    /^\/resource\/core\/v1\/order\/popwindow$/,
-
-    // 下单页商品推荐（弹窗的候选数据来源）
-    /^\/resource\/core\/v2\/product\/preRecommender$/,
-    /^\/resource\/core\/v3\/product\/recommenderAround$/,
+    // ⚠ 以下三个「下单流程」接口在 v10 里被移除：
+    //   129 号抓包中，它们在 250ms 内连续返回伪造响应后，
+    //   cookie 的 uid 立刻从 123 清成 0 → 49，下一次冷启就是未登录状态。
+    //   这就是掉登录的元凶，暂时不碰，下单弹窗先留着。
+    // /^\/resource\/core\/v1\/order\/popwindow$/,
+    // /^\/resource\/core\/v2\/product\/preRecommender$/,
+    // /^\/resource\/core\/v3\/product\/recommenderAround$/,
   ];
 
   var url = ($request && $request.url) ? String($request.url) : "";
