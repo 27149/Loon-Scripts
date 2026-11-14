@@ -1,12 +1,12 @@
-#!name=瑞幸咖啡去广告 v10
-#!desc=v10 (2026-11-14 23:20) 只拦 adposNew + effect/modules（开屏+首页弹窗）；下单流程三个接口已移除（129 号抓包证明它们会清空会话）；脚本 luckin_one.js?v=9
+#!name=瑞幸咖啡去广告 v10.1
+#!desc=v10.1 (2026-11-14 23:25) 脚本改用独立文件名 luckin_v10.js（避免 Loon 按路径缓存旧脚本）；拦截 adposNew + effect/modules；命中时首启会弹通知自证版本
 #!author=zq
 #!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_icon.png
 #!date=2026-11-14
 
 [Script]
 # 命中脚本里列出的广告配置接口 → 返回可解密的空响应；其余接口原样放行
-http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js?v=9, requires-body=false, timeout=10, tag=瑞幸去广告
+http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_v10.js, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
