@@ -1,26 +1,30 @@
 /*************************************************************
- * 瑞幸咖啡 · 广告配置接口拦截（v6）
+ * 瑞幸咖啡 · 广告配置接口拦截（v7）
  *
- * 从两次 HAR 得到的结论：
- *   - reject-200（0 字节）会让客户端解密失败 → 弹「网络不可用」
- *   - 拦 mkt CDN 会让弹窗 H5 启动失败 → 蒙层卡死
- *   - 正确做法：返回一份**客户端能解密**的「成功 + 空内容」响应
+ * 已验证的前提（2026-11-14）：
+ *   - 返回可解密的「成功+空内容」密文，不会让客户端解密失败（不会弹「网络不可用」）
+ *   - 不拦 HTTPDNS、不拦 CDN，就不会掉登录、不会出现卡死的蒙层
+ *   - 这套机制下登录态稳定，所以可以扩大拦截范围
  *
- * 默认只处理开屏（adposNew）。首页弹窗（effect/modules）的开关在下面，
- * 打开它可以去掉首页弹窗，但有一定概率影响首页模块渲染，所以默认关闭。
- *
- * 其余接口一律原样放行，不修改任何内容。
+ * 每个接口都可以单独开关：注释掉对应那行即可回退。
  *************************************************************/
 (function () {
   // 取自 /resource/m/sys/visual/effect/modules 的空响应（320 字节密文，客户端可正常解密）
   var EMPTY = "-UBHkcAJ3OmMImYZUqpZFSq6F9XXNfjIELv4HZUdZRDaSi-pRBTbLeTL6IsJGh-oB_Rti0AhsF2j7SdHYvllbK2gLtxAEiipsx-uk-n4dBnZESZ7a6Nb0r9qTt0UeyBUdFj4LxqiaccdyK8PnN4FYb50_Lw47ZLrMTBaW_4DO5YDwVZ9p5fY_lQP6C90DSE2qgLl4DyZ7PgEHi08cS0yPI_ojG68kMA8LTqGO0wpVV4IAqVaxDjm4SZ4MUGqGz_MC1f_mHH1q8Num1bn0SamilxnA-5dBUI9F9ImNLQg9MhlGwk7g1BGwe395GIsNUWnm1w88FmEYJv-NeOksSAyWIULVm4504TvPsfrRp0ikJcehz8o9J9cEWTPU4tyAwvviF0GkP_irZ6Dc-eJrFVoensYiyt03QFg3b9Tchgxfzg=";
 
   var INTERCEPT = [
-    // 开屏广告：默认开启
+    // 开屏素材（原 adposNew 通道）
     /^\/resource\/m\/sys\/app\/adposNew$/,
 
-    // 首页弹窗：默认关闭。打开后可去首页弹窗，但可能影响首页模块渲染，先观察首页是否正常
-    // /^\/resource\/m\/sys\/visual\/effect\/modules$/,
+    // 视觉效果模块：HAR 里启动时被连续请求 3 次，是开屏/首页弹窗素材的实际来源
+    /^\/resource\/m\/sys\/visual\/effect\/modules$/,
+
+    // 下单确认页弹窗
+    /^\/resource\/core\/v1\/order\/popwindow$/,
+
+    // 下单页商品推荐（弹窗的候选数据来源）
+    /^\/resource\/core\/v2\/product\/preRecommender$/,
+    /^\/resource\/core\/v3\/product\/recommenderAround$/,
   ];
 
   var url = ($request && $request.url) ? String($request.url) : "";
@@ -32,9 +36,8 @@
     if (INTERCEPT[i].test(path)) { hit = true; break; }
   }
 
-  console.log("[瑞幸] " + method + " " + path + (hit ? " → 返回空响应" : ""));
-
   if (hit) {
+    console.log("[瑞幸] " + method + " " + path + " → 空响应");
     $done({
       response: {
         status: 200,
@@ -45,5 +48,7 @@
     return;
   }
 
+  // 非目标接口：只记录，不改动
+  console.log("[瑞幸] " + method + " " + path);
   $done({});
 })();
