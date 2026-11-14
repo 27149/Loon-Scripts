@@ -14,7 +14,7 @@ IP-CIDR,119.29.29.89/32,REJECT,no-resolve
 [Script]
 # 一条规则覆盖整个 capi 域：由脚本判断是广告接口（返回空响应）还是普通接口（原样放行），
 # 并对所有请求做日志/通知自检。
-http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js, requires-body=false, timeout=10, tag=瑞幸去广告
+http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js?v=2, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
