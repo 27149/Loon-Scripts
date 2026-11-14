@@ -1,0 +1,10 @@
+#!name=瑞幸登录态诊断
+#!desc=只读诊断：把 capi 每次响应的 code / busiCode / status / loginState / uid / unit 打到 Loon 日志，用于区分「服务端让 token 失效」还是「客户端自己清登录态」。不修改任何响应
+#!author=zq
+#!date=2026-11-14
+
+[Script]
+response if ${url} ~= /capi\.lkcoffee\.com/i then script("https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_diag.js") with requires_body=true, tag="瑞幸诊断", timeout=20
+
+[MITM]
+hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
