@@ -37,6 +37,43 @@
     if (INTERCEPT[i].test(path)) { hit = true; break; }
   }
 
+  // ---------- 会话变化自检 ----------
+  // HAR 实测：登录态体现在 cookie 的 uid 字段长度上
+  //   len=123 → 已登录；len=49 / 0 → 未登录或会话被清
+  // 长度变化时自动弹通知 + 记日志，并带上"变化前最后 4 个请求路径"
+  try {
+    var ck = "";
+    var hs = ($request && $request.headers) ? $request.headers : {};
+    for (var k in hs) {
+      if (Object.prototype.hasOwnProperty.call(hs, k) && k.toLowerCase() === "cookie") { ck = String(hs[k]); break; }
+    }
+    var uidVal = "";
+    var m = ck.match(/(?:^|;\s*)uid=([^;]*)/);
+    if (m) uidVal = m[1];
+    var uidLen = uidVal.length;
+
+    var KEY_LEN = "luckin_uid_len";
+    var KEY_REC = "luckin_recent";
+    var prevLen = parseInt($persistentStore.read(KEY_LEN) || "-1", 10);
+    var recent = [];
+    try { recent = JSON.parse($persistentStore.read(KEY_REC) || "[]") || []; } catch (e) { recent = []; }
+    if (!(recent instanceof Array)) recent = [];
+
+    if (prevLen >= 0 && prevLen !== uidLen) {
+      var tail = recent.slice(-4).join(" ← ");
+      console.log("[瑞幸] ⚠ 会话变化 uid_len " + prevLen + " → " + uidLen + " | 变化前: " + tail);
+      try {
+        $notification.post("瑞幸会话变化", "uid " + prevLen + " → " + uidLen,
+          tail ? ("前几个请求: " + tail).slice(0, 180) : path);
+      } catch (e) {}
+    }
+
+    $persistentStore.write(String(uidLen), KEY_LEN);
+    recent.push((hit ? "[拦]" : "") + path);
+    while (recent.length > 6) recent.shift();
+    $persistentStore.write(JSON.stringify(recent), KEY_REC);
+  } catch (e) { /* 自检失败不影响拦截 */ }
+
   if (hit) {
     console.log("[瑞幸] " + method + " " + path + " → 空响应");
     $done({

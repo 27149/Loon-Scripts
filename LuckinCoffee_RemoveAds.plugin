@@ -1,12 +1,12 @@
-#!name=瑞幸咖啡去广告 v8
-#!desc=v8 (2026-11-15 00:05) 摘掉 effect/modules（怀疑它承载会话引导）；仍拦 adposNew / order popwindow / preRecommender / recommenderAround；脚本 luckin_one.js?v=7
+#!name=瑞幸咖啡去广告 v9
+#!desc=v9 (2026-11-14 23:15) 拦截不变（adposNew/popwindow/两个推荐，effect-modules 仍放开）；新增会话变化自检：uid cookie 长度变化时弹通知并记下前几个请求
 #!author=zq
 #!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_icon.png
 #!date=2026-11-14
 
 [Script]
 # 命中脚本里列出的广告配置接口 → 返回可解密的空响应；其余接口原样放行
-http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js?v=7, requires-body=false, timeout=10, tag=瑞幸去广告
+http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js?v=8, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
