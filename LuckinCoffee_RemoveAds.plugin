@@ -1,20 +1,21 @@
 #!name=瑞幸咖啡去广告
-#!desc=开屏/首页弹窗/下单弹窗去广告。响应侧不可靠，这里用已验证可行的请求阶段拦截：命中广告接口直接返回 App 能解密的「成功+空内容」密文；同时把 capi 的每次请求写进日志、并弹通知，用于自检 MITM 是否真的命中
+#!desc=资源层去广告：不替换任何 API 响应体（避免掉登录），只拦营销 CDN 与开屏配置接口
 #!author=zq
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/9d/3b/9a/9d3b9ad3-4b4c-8dae-68c5-d6a1594d20e6/AppIcon-0-0-1x_U007emarketing-0-6-0-85-220.png/256x256bb.png
 #!date=2026-11-14
 
-[Rule]
-# 瑞幸用腾讯 HTTPDNS 把 capi.lkcoffee.com 解析成 IP 后直连，可能绕过按域名匹配的 MITM。
-# 拒绝 HTTPDNS 服务器，迫使 App 回落到系统 DNS（走域名，插件才能生效）。
-IP-CIDR,119.29.29.87/32,REJECT,no-resolve
-IP-CIDR,119.28.28.87/32,REJECT,no-resolve
-IP-CIDR,119.29.29.89/32,REJECT,no-resolve
+[Rewrite]
+# 开屏广告：直接返回 200 空体（不是断连，避免「网络不可用」弹窗）
+# 如果这一步仍然导致掉登录，把下面这行前面加 # 注释掉即可单独验证
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew url reject-200
+
+# 首页弹窗：H5 素材在营销 CDN 上（mkt.luckincoffeecdn.com/coffee/web-dialog/），
+# 拦掉整个营销 CDN，弹窗就加载不出来 —— 不触碰任何业务接口的响应体
+^https:\/\/mkt\.luckincoffeecdn\.com\/ url reject
 
 [Script]
-# 一条规则覆盖整个 capi 域：由脚本判断是广告接口（返回空响应）还是普通接口（原样放行），
-# 并对所有请求做日志/通知自检。
-http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js?v=2, requires-body=false, timeout=10, tag=瑞幸去广告
+# 只读：把 capi 的每次请求写进日志、新路径弹通知，不修改任何响应
+http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_one.js?v=4, requires-body=false, timeout=10, tag=瑞幸观察
 
 [MITM]
-hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
+hostname = %APPEND% capi.lkcoffee.com, mkt.luckincoffeecdn.com, 152.136.248.40
