@@ -16,8 +16,9 @@
     // 开屏素材（原 adposNew 通道）
     /^\/resource\/m\/sys\/app\/adposNew$/,
 
-    // 视觉效果模块：HAR 里启动时被连续请求 3 次，是开屏/首页弹窗素材的实际来源
-    /^\/resource\/m\/sys\/visual\/effect\/modules$/,
+    // 视觉效果模块：v7 里开着，但 v7.1 后出现掉登录，它是每次启动都调 3 次的接口，
+    // 最可能承载会话引导数据，v8 先摘掉（首页弹窗可能会回来，用于确认它是不是元凶）
+    // /^\/resource\/m\/sys\/visual\/effect\/modules$/,
 
     // 下单确认页弹窗
     /^\/resource\/core\/v1\/order\/popwindow$/,
