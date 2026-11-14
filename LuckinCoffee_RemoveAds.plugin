@@ -13,13 +13,13 @@ IP-CIDR,119.29.29.89/32,REJECT,no-resolve
 
 [Script]
 # 开屏广告 + 首页弹窗素材
-http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸开屏广告
+http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@fafdfdb9fc7cda320414c42aeab0f5234aae8f3a/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸开屏广告
 
 # 下单确认页弹窗
-http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸下单弹窗
+http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@fafdfdb9fc7cda320414c42aeab0f5234aae8f3a/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸下单弹窗
 
 # 下单页商品推荐
-http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸下单推荐
+http-request ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@fafdfdb9fc7cda320414c42aeab0f5234aae8f3a/luckin_empty.js, requires-body=false, timeout=10, tag=瑞幸下单推荐
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
