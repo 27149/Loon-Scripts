@@ -1,100 +1,72 @@
 /*************************************************************
- * 瑞幸咖啡 · 响应侧去广告（v2）
+ * 瑞幸咖啡 · 响应侧去广告（v3）
  *
- * 与旧方案的区别：
- *   旧方案 = 在「请求」阶段直接伪造响应（丢掉真实信封、丢掉所有网关响应头）
- *   新方案 = 让请求正常到达服务器，在「响应」阶段只清空业务内容，
- *            完整保留 code / busiCode / status / loginState / uid / msg / zeusId
- *            以及原响应头（X-IS-Error / X-LK-UNIT-* / X-ZEUS-MSG-ID 等）
+ * v2 失效复盘：v2 给三条规则都加了 `argument={debug}`（Boolean 对象参数），
+ * 这个写法在旧版 Script 语法里最容易解析失败，一旦规则被判无效，三条规则会一起失效。
+ * v3 不接收任何 $argument，也不依赖开关，最大化兼容。
  *
- * 适用于 Loon 的 response script（http-response），必须 requires_body=true。
+ * 两种响应形态都能处理：
+ *   1) 明文 JSON 信封  → 只清空 content，code/loginState/uid/zeusId 原样保留（最优）
+ *   2) 密文响应        → 回放已知可被 App 解密的「成功+空内容」密文，响应头/状态码保持真实
  *
- * $argument:
- *   { debug: true }        打印原始信封摘要
- *   { debug: true, mode: "scrub" }
- *        clear（默认）：把 content 整体清成 {} 或 []
- *        scrub       ：只删除 content 里形似广告/推荐/弹窗的字段
- *
- * 安全兜底：如果响应体不是明文 JSON 信封（例如接口返回的是密文），
- * 本脚本原样放行、不做任何改写 —— 宁可这一次广告没去掉，也不返回无法解析的内容。
+ * 注意：任何改写都只换 body，不换 status / headers，
+ *      所以 X-ZEUS-MSG-ID、X-LK-UNIT-ORIGIN、X-IS-ERROR 这些网关头不会丢。
  *************************************************************/
 (function () {
-  var url = ($request && $request.url) ? String($request.url).split("?")[0] : "";
-  var body = ($response && $response.body) ? $response.body : "";
-  if (typeof body !== "string") { body = body ? String(body) : ""; }
+  // 取自 /resource/m/sys/visual/effect/modules 的空响应（2026-11-13 抓包，320 字节密文）
+  var EMPTY = "-UBHkcAJ3OmMImYZUqpZFSq6F9XXNfjIELv4HZUdZRDaSi-pRBTbLeTL6IsJGh-oB_Rti0AhsF2j7SdHYvllbK2gLtxAEiipsx-uk-n4dBnZESZ7a6Nb0r9qTt0UeyBUdFj4LxqiaccdyK8PnN4FYb50_Lw47ZLrMTBaW_4DO5YDwVZ9p5fY_lQP6C90DSE2qgLl4DyZ7PgEHi08cS0yPI_ojG68kMA8LTqGO0wpVV4IAqVaxDjm4SZ4MUGqGz_MC1f_mHH1q8Num1bn0SamilxnA-5dBUI9F9ImNLQg9MhlGwk7g1BGwe395GIsNUWnm1w88FmEYJv-NeOksSAyWIULVm4504TvPsfrRp0ikJcehz8o9J9cEWTPU4tyAwvviF0GkP_irZ6Dc-eJrFVoensYiyt03QFg3b9Tchgxfzg=";
 
-  var arg = (typeof $argument === "undefined") ? null : $argument;
-  var dbg = false;
-  var mode = "clear";
-  if (arg && typeof arg === "object") {
-    dbg = arg.debug === true;
-    if (arg.mode === "scrub") mode = "scrub";
-  } else if (typeof arg === "string") {
-    dbg = /(^|[&?,\s])debug=true/.test(arg);
-    if (/mode=scrub/.test(arg)) mode = "scrub";
+  function hdr(obj, name) {
+    if (!obj) return null;
+    var lower = name.toLowerCase();
+    for (var k in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, k) && k.toLowerCase() === lower) return obj[k];
+    }
+    return null;
+  }
+
+  var url = ($request && $request.url) ? String($request.url) : "";
+  var path = url.split("?")[0].replace(/^https?:\/\/[^/]+/, "");
+  var status = ($response && $response.status) || 0;
+  var unit = hdr($response && $response.headers, "X-LK-UNIT-ORIGIN") || "-";
+  var raw = ($response && $response.body) ? $response.body : "";
+  if (typeof raw !== "string") { raw = raw ? String(raw) : ""; }
+
+  // 非 200 一律放行，避免把错误页也替换成"成功"
+  if (status !== 200) {
+    console.log("[瑞幸去广告] " + path + " status=" + status + " → 放行");
+    $done({});
+    return;
   }
 
   var env = null;
-  try { env = JSON.parse(body); } catch (e) { env = null; }
+  try { env = JSON.parse(raw); } catch (e) { env = null; }
 
-  // 不是明文 JSON 信封 → 放行，绝不塞入密文/快照
+  // 密文响应 → 回放空响应（保留真实 status 与 headers）
   if (!env || typeof env !== "object" || Array.isArray(env)) {
-    console.log("[瑞幸去广告] 放行(非JSON信封) " + url + " len=" + body.length);
-    $done({});
+    console.log("[瑞幸去广告] " + path + " json=N len=" + raw.length + " unit=" + unit + " → 密文兜底");
+    $done({ body: EMPTY });
     return;
   }
 
   var codeOk = (env.code === 0 || env.code === "0");
-  if (dbg || !codeOk) {
-    console.log("[瑞幸去广告] 原始 " + url +
-      " code=" + env.code +
-      " busiCode=" + env.busiCode +
-      " status=" + env.status +
-      " loginState=" + env.loginState +
-      " uid=" + (env.uid ? String(env.uid).slice(0, 6) + "…" : "空") +
-      " contentKeys=" + (env.content && typeof env.content === "object"
-        ? Object.keys(env.content).slice(0, 12).join("|") : typeof env.content));
-  }
+  console.log("[瑞幸去广告] " + path + " json=Y code=" + env.code +
+    " status=" + env.status + " loginState=" + env.loginState + " unit=" + unit +
+    (codeOk ? " → 清空content" : " → 放行(非成功)"));
 
-  // 只处理成功响应；错误/未登录响应保持原样
   if (!codeOk) { $done({}); return; }
 
   var c = env.content;
-  if (c === null || c === undefined) {
-    if (dbg) console.log("[瑞幸去广告] content 本来就是空，无需改写");
-    $done({});
-    return;
-  }
-
-  if (typeof c === "object") {
-    if (Array.isArray(c)) {
-      env.content = [];
-    } else if (mode === "scrub") {
-      var AD = /(^|[^a-z])(ad|ads|adlist|adinfo|adpos|adnew|splash|splashad|banner|banners|popup|popwindow|recommend|recommendlist|promo|promotion)([^a-z]|$)/i;
-      var keys = Object.keys(c);
-      for (var i = 0; i < keys.length; i++) {
-        if (AD.test(keys[i])) { delete c[keys[i]]; }
-      }
-      if (Object.keys(c).length === 0) env.content = {};
-    } else {
-      env.content = {};
-    }
-  } else if (typeof c === "string") {
-    // content 是字符串（可能是加密串或 JSON 串），保守处理：不改
-    if (dbg) console.log("[瑞幸去广告] content 为字符串，保守放行");
-    $done({});
+  if (c && typeof c === "object") {
+    env.content = Array.isArray(c) ? [] : {};
+  } else if (typeof c === "string" && c) {
+    // content 是加密串，JSON 路径处理不了 → 退回密文兜底
+    $done({ body: EMPTY });
     return;
   } else {
-    env.content = mode === "scrub" ? env.content : {};
+    $done({});
+    return;
   }
 
-  if (dbg) {
-    console.log("[瑞幸去广告] 已改写 " + url +
-      " → content=" + JSON.stringify(env.content) +
-      " loginState=" + env.loginState +
-      " (信封字段保持不变)");
-  }
-
-  // 只替换 body，status 和全部响应头沿用真实响应
   $done({ body: JSON.stringify(env) });
 })();

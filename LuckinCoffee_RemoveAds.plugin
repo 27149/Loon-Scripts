@@ -1,24 +1,28 @@
-#!name=瑞幸咖啡去广告 v2
-#!desc=响应侧改写：只清广告内容，保留 code/loginState/uid 信封和网关响应头；不再全局拦截腾讯 HTTPDNS，也不碰未验证的下单流程接口
+#!name=瑞幸咖啡去广告 v3
+#!desc=开屏/首页弹窗/下单弹窗去广告；响应侧改写，保留登录态信封与网关响应头；恢复腾讯 HTTPDNS 拦截（App 走 IP 直连时绕过 MITM 的关键）
 #!author=zq
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/9d/3b/9a/9d3b9ad3-4b4c-8dae-68c5-d6a1594d20e6/AppIcon-0-0-1x_U007emarketing-0-6-0-85-220.png/256x256bb.png
 #!date=2026-11-14
 
-[Argument]
-order_popup = switch,false,tag=下单页弹窗/推荐（默认关）
-debug = switch,false,tag=调试日志
+[Rule]
+# 瑞幸用腾讯 HTTPDNS 把 capi.lkcoffee.com 解析成 IP 后直连，会绕过按域名匹配的 MITM。
+# 拒绝 HTTPDNS 服务器，迫使 App 回落到系统 DNS（走域名，插件才能生效）。
+# 副作用：这是全局规则，其它用同一 HTTPDNS 的 App 也会受影响；如确认掉登录与它有关，优先试验删掉这三行（代价是去广告失效）。
+IP-CIDR,119.29.29.87/32,REJECT,no-resolve
+IP-CIDR,119.28.28.87/32,REJECT,no-resolve
+IP-CIDR,119.29.29.89/32,REJECT,no-resolve
 
 [Script]
 # 开屏广告 + 首页弹窗素材
-# 旧做法：http-request 阶段直接伪造响应 → 丢掉信封和响应头（怀疑的掉登录根因）
-# 新做法：让请求正常到达服务器，只在响应侧清空 content
-http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js, argument={debug}, requires-body=true, timeout=20, tag=瑞幸开屏
+http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js, requires-body=true, timeout=20, tag=瑞幸开屏
 
-# 下单确认页弹窗（默认关闭，先隔离掉登录变量；确认无影响后再打开）
-http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js, argument={debug}, enabled={order_popup}, requires-body=true, timeout=20, tag=瑞幸下单弹窗
+# 下单确认页弹窗
+http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v1\/order\/popwindow script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js, requires-body=true, timeout=20, tag=瑞幸下单弹窗
 
-# 下单页商品推荐（同上，默认关闭）
-http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js, argument={debug}, enabled={order_popup}, requires-body=true, timeout=20, tag=瑞幸下单推荐
+# 下单页商品推荐
+http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/product\/preRecommender script-path=https://cdn.jsdelivr.net/gh/27149/Loon-Scripts@main/luckin_ad_strip.js, requires-body=true, timeout=20, tag=瑞幸下单推荐
+
+# 想只保留开屏、先隔离下单弹窗时，把上面「下单确认页弹窗」「下单页商品推荐」两行前面加 # 注释掉即可
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, 152.136.248.40
