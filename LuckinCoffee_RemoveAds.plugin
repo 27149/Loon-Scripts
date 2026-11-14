@@ -1,7 +1,7 @@
 #!name=瑞幸咖啡去广告 v7
-#!desc=v7 (2026-11-14 22:45) 拦截 5 个广告接口：开屏 adposNew / 视觉效果 modules / 下单 popwindow / 两个推荐；脚本 luckin_one.js?v=6
+#!desc=v7.1 (2026-11-14 22:52) 拦截 5 个广告接口：开屏 adposNew / 视觉效果 modules / 下单 popwindow / 两个推荐；脚本 luckin_one.js?v=6（本版仅更换图标，逻辑未变）
 #!author=zq
-#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/9d/3b/9a/9d3b9ad3-4b4c-8dae-68c5-d6a1594d20e6/AppIcon-0-0-1x_U007emarketing-0-6-0-85-220.png/256x256bb.png
+#!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_icon.png
 #!date=2026-11-14
 
 [Script]
