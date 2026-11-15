@@ -5,7 +5,7 @@
 
 [Script]
 # 这里引用了你刚才上传的那个 JS 文件
-http-response ^https?:\/\/.*\.meituan\.com\/.*(splash|loadInfo) script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/refs/heads/main/meituan_pro.js, requires-body=true, timeout=10, tag=美团自研净化
+http-response ^https?:\/\/.*\.meituan\.com\/.*(splash|loadInfo) script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/meituan/meituan_pro.js, requires-body=true, timeout=10, tag=美团自研净化
 
 [MITM]
 hostname = *.meituan.com, wmapi.meituan.com
