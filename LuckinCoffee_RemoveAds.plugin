@@ -1,12 +1,12 @@
-#!name=瑞幸咖啡去广告 v12
-#!desc=v12 (2026-11-15 10:15) 开屏+首页弹窗(自关闭空页)+下单弹窗(popwindow，带会话安全阀)。若检测到会话被清会自动停用 popwindow 拦截
+#!name=瑞幸咖啡去广告 v13
+#!desc=v13 (2026-11-15 10:25) 只保留已验证的两项：开屏 adposNew + 首页弹窗(自关闭空页)。已撤掉 popwindow（拦它去不掉下单弹窗，还有会话风险）
 #!author=zq
 #!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_icon.png
 #!date=2026-11-14
 
 [Script]
 # 命中脚本里列出的广告配置接口 → 返回可解密的空响应；其余接口原样放行
-http-request ^https:\/\/(capi|mkt)\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_v12.js, requires-body=false, timeout=10, tag=瑞幸去广告
+http-request ^https:\/\/(capi|mkt)\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_v13.js, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, mkt.lkcoffee.com, 152.136.248.40
