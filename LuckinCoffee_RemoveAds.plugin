@@ -1,5 +1,5 @@
-#!name=瑞幸咖啡去广告 v15
-#!desc=v15 (2026-11-15 10:50) 首页弹窗改用 url reject（连接失败 → App 的错误回调收容器），这是你最早那版插件验证过的做法；开屏仍用空响应
+#!name=瑞幸咖啡去广告 v16
+#!desc=v16 (2026-11-15 11:25) 开屏(空响应) + 首页弹窗(url reject) + 下单弹窗(preRecommender，带会话安全阀：检测到会话被清会自动停用)
 #!author=zq
 #!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_icon.png
 #!date=2026-11-15
@@ -11,7 +11,7 @@
 
 [Script]
 # 开屏 + effect/modules：返回客户端可解密的空响应；其余 capi 接口原样放行
-http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_v15.js, requires-body=false, timeout=10, tag=瑞幸去广告
+http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin_v16.js, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, mkt.lkcoffee.com, 152.136.248.40
