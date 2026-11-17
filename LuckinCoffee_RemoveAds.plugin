@@ -1,17 +1,13 @@
-#!name=瑞幸咖啡去广告 v16
-#!desc=v16 (2026-11-15 11:25) 开屏(空响应) + 首页弹窗(url reject) + 下单弹窗(preRecommender，带会话安全阀：检测到会话被清会自动停用)
+#!name=瑞幸咖啡去广告 v17
+#!desc=v17 (2026-11-17 13:45) 首页弹窗改为「回源真实页面 + 注入自动关闭」：不再用 url reject（它在 Loon 里返回 404，会让 WebView 卡在无按钮蒙层）；注入失败则原样放行，最差也只是弹窗正常显示
 #!author=zq
 #!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin/icon.png
-#!date=2026-11-15
-
-[Rewrite]
-# 首页弹窗：直接断掉连接。让 WebView 走 didFail 错误分支，由 App 自己关闭容器。
-# （之前的"空页面"方案是加载成功但页面不回调，所以容器永远不收 → 蒙层）
-^https:\/\/mkt\.lkcoffee\.com\/webdialog url reject
+#!date=2026-11-17
 
 [Script]
-# 开屏 + effect/modules：返回客户端可解密的空响应；其余 capi 接口原样放行
-http-request ^https:\/\/capi\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin/luckin_v16.js, requires-body=false, timeout=10, tag=瑞幸去广告
+# capi：开屏 + effect/modules + preRecommender（带安全阀）
+# mkt：首页弹窗页面，回源后注入自动关闭脚本
+http-request ^https:\/\/(capi|mkt)\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin/luckin_v17.js, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, mkt.lkcoffee.com, 152.136.248.40
