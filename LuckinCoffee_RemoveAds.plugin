@@ -1,5 +1,5 @@
-#!name=瑞幸咖啡去广告 v20
-#!desc=v20 (2026-11-17 19:52) 首页弹窗：首帧隐藏+立即关闭（消除闪动），3 秒未关闭则恢复可见防止隐形蒙层；启动时日志打印下单拦截状态
+#!name=瑞幸咖啡去广告 v21
+#!desc=v21 (2026-11-18 14:15) 首页弹窗：关闭脚本提前注入到 <head>（外部 JS 加载前就开始调用），50ms 重试，尽量压缩容器出现到关闭的时间
 #!author=zq
 #!icon=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin/icon.png
 #!date=2026-11-17
@@ -7,7 +7,7 @@
 [Script]
 # capi：开屏 + effect/modules + preRecommender（带安全阀）
 # mkt：首页弹窗页面，回源后注入自动关闭脚本
-http-request ^https:\/\/(capi|mkt)\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin/luckin_v20.js, requires-body=false, timeout=10, tag=瑞幸去广告
+http-request ^https:\/\/(capi|mkt)\.lkcoffee\.com\/ script-path=https://raw.githubusercontent.com/27149/Loon-Scripts/main/luckin/luckin_v21.js, requires-body=false, timeout=10, tag=瑞幸去广告
 
 [MITM]
 hostname = %APPEND% capi.lkcoffee.com, mkt.lkcoffee.com, 152.136.248.40
